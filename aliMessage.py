@@ -1,4 +1,3 @@
-from django.conf import settings
 import requests
 from urllib.parse import quote_plus
 import json, random
@@ -7,7 +6,11 @@ import hmac
 import datetime, time
 import base64
 
+from ali.keys import acquire_config
+
 message_url = "https://dysmsapi.aliyuncs.com/"
+
+message_par = acquire_config.get_all_message_parameter()
 
 
 class AliMessage():
@@ -35,7 +38,7 @@ class AliMessage():
         # 由当前时间获得UTC时间
         Timestamp = self.get_Utc_time_stap()
         par_dict["Timestamp"] = Timestamp
-        SignatureNonce = settings.SECRET_KEY
+        SignatureNonce = message_par["SECRET_KEY"]
 
         # 签名唯一随机数,为了防止请求被阿里给封掉，每次需要设置不一样的随机数
         SignatureNonce += str(random.randrange(1, 10000000))
@@ -107,7 +110,6 @@ class AliMessage():
         return utc_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def sign(self, unsign_string):
-
         sign_secret = self.AccessKeySecret.encode("utf-8")
         # 利用 hmac 对其 按照sha1方式进行加密
         signature = hmac.new(sign_secret, unsign_string, sha1).digest()
@@ -117,21 +119,22 @@ class AliMessage():
 
 
 def message():
-    alipay_par = settings.ALIPAYMESSAGE_PARAMETER
+    alipay_par = message_par
     AccessKeyId = alipay_par.get("AccessKeyId")
     AccessKeySecret = alipay_par.get("AccessKeySecret")
     Action = alipay_par.get("Action")
-    return AliMessage(AccessKeySecret=AccessKeySecret,AccessKeyId=AccessKeyId,Action=Action)
+    return AliMessage(AccessKeySecret=AccessKeySecret, AccessKeyId=AccessKeyId, Action=Action)
 
-def request_send_message(url,**kwargs):
 
+def request_send_message(url, **kwargs):
     response = requests.get(url)
     if str(response.status_code) != "200":
-        return {"status":"300","message":"请求失败"}
+        return {"status": "300", "message": "请求失败"}
     data = response.json()
     if data.get("Code") != "OK":
-        return {"status":"400","message":"代码有误"}
-    return {"status":"200","message":data.get('BizId',None)}
+        print(data.get("Code"))
+        return {"status": "400", "message": "代码有误", "Code": data.get("Code")}
+    return {"status": "200", "message": data.get('BizId', None)}
 
 
 if __name__ == '__main__':
