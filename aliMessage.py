@@ -138,12 +138,12 @@ def request_send_message(url, **kwargs):
 
 
 if __name__ == '__main__':
-    ali = AliMessage(AccessKeyId="LTAIJJV4548imhry", AccessKeySecret="4bSCNN4jTYBFEr35aKDFW33459e0tL",
+    ali = AliMessage(AccessKeyId="LTAIdsFDJJV5234548hry", AccessKeySecret="4bSCNN4DSDS344jTYBFEFW33459e0tL",
                      Action="SendSms")
 
-    TemplateCode = "SMS_460574915"
+    TemplateCode = "SMS_460543415"
     SignName = "xxxx"
     TemplateParam = {"code": "aasdda"}
-    sign_string = ali.send_message_sign(PhoneNumbers="14317131625",
+    sign_string = ali.send_message_sign(PhoneNumbers="14117131625",
                                         TemplateParam=TemplateParam, TemplateCode=TemplateCode, SignName=SignName)
     print(sign_string)
